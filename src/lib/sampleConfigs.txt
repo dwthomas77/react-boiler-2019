@@ -1,0 +1,194 @@
+/* Node Modules */
+const path = require('path');
+const webpack = require('webpack');
+
+/* Constants */
+const isProduction = process.env.NODE_ENV === 'production';
+const buildPath = path.resolve(__dirname, 'dist');
+const srcPath = path.resolve(__dirname, 'src');
+const publicPath = '/tf/';
+const globals = require('./src/globals.js');
+
+
+/* Plugins */
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+// const OfflinePlugin = require('offline-plugin');
+
+/* HTML Config */
+const html = {
+    template: 'src/index.html',
+    showErrors: !isProduction,
+    favicon: 'src/static/favicon.ico',
+};
+
+const htmlNoNav = {
+    template: 'src/index_nonav.html',
+    showErrors: !isProduction,
+    favicon: 'src/static/favicon.ico',
+    filename: 'index_nonav.html',
+};
+
+
+/* Webpack Config */
+
+const sassConfig = {
+    loader: 'sass-loader',
+    options: {
+        includePaths: [`${srcPath}/styles`],
+        sourceMap: true,
+    },
+};
+
+const postcssConfig = {
+    loader: 'postcss-loader',
+    options: {
+        ident: 'postcss',
+        sourceMap: true,
+    },
+}
+
+const config = {
+    mode: 'none',
+
+    entry: {
+        index: './src/main.js',
+    },
+
+    output: {
+        path: buildPath,
+        filename: '[name].[hash].js',
+        chunkFilename: '[name].[hash].js',
+        publicPath,
+    },
+
+    module: {
+        rules: [
+
+            { // Javascript Loader
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            'react',
+                            'es2015',
+                            'es2016',
+                            'es2017',
+                            'stage-0',
+                        ],
+                        plugins: [
+                            'transform-runtime',
+                            'lodash',
+                            'react-html-attrs',
+                            'transform-react-constant-elements',
+                            'transform-react-remove-prop-types',
+                            'transform-react-pure-class-to-function',
+                        ],
+                    },
+                },
+            },
+
+            { // Style Loader
+                test: /\.css|\.scss|\.sass/,
+                // exclude: /node_modules/,
+                use: isProduction
+                    ? ExtractTextPlugin.extract({
+                        fallback: 'style-loader',
+                        // resolve-url-loader may be chained before sass-loader if necessary
+                        use: ['css-loader', postcssConfig, 'resolve-url-loader', sassConfig],
+                    })
+                    : ['style-loader', 'css-loader', postcssConfig, 'resolve-url-loader', sassConfig],
+            },
+
+            { // File Loader
+                test: /\.(jpe?g|png|gif|svg|eot|ttf|woff|woff2)$/i,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        name: '[name].[hash].[ext]',
+                        limit: 1000,
+                    },
+                },
+            },
+
+            { // CSV Loader
+                test: /\.csv$/,
+                loader: 'csv-loader',
+                options: {
+                    dynamicTyping: true,
+                    header: true,
+                    skipEmptyLines: true,
+                },
+            },
+        ],
+    },
+
+    plugins: [
+        new HtmlWebpackPlugin(html),
+        new HtmlWebpackPlugin(htmlNoNav),
+        new CleanWebpackPlugin(['dist']),
+        new ExtractTextPlugin('styles.admin.css'), // this is weak to caching, but is set to uncacheable at this time
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+        new webpack.DefinePlugin(globals),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+        }),
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     name: 'common', // Specify the common bundle's name.
+        //     minChunks: 2,
+        // }),
+        // isProduction && new webpack.optimize.UglifyJsPlugin(),
+        !isProduction && new webpack.NamedModulesPlugin(),
+        isProduction && new CopyWebpackPlugin([{ from: `${srcPath}/qa.json` }]),
+        new CopyWebpackPlugin([{ from: `${srcPath}/api`, to: `${buildPath}/api` }]),
+        // !isProduction && new webpack.HotModuleReplacementPlugin(),
+        // isProduction && new OfflinePlugin(),
+    ].filter(x => x),
+
+    optimization: {
+        minimizer: [
+            new UglifyJsPlugin({
+                uglifyOptions: {
+                    warnings: false,
+                    parse: {},
+                    compress: {},
+                    mangle: true, // Note `mangle.properties` is `false` by default.
+                    output: null,
+                    toplevel: false,
+                    nameCache: null,
+                    ie8: false,
+                    keep_fnames: false,
+                },
+            }),
+        ],
+    },
+
+    resolve: {
+        modules: [srcPath, 'node_modules'],
+        extensions: ['.js', '.jsx', '.scss', '.css', '.json'],
+    },
+
+    devtool: isProduction
+        ? 'source-map'
+        : 'eval',
+
+    devServer: {
+        hot: false,
+        contentBase: buildPath,
+        compress: true,
+        host: '0.0.0.0',
+        disableHostCheck: true,
+        port: 3030,
+        historyApiFallback: {
+            index: publicPath,
+        },
+    },
+};
+
+module.exports = config;
