@@ -1,5 +1,5 @@
 import React from 'react';
-//import logo from './logo.svg';
+import { connect } from 'react-redux';
 import List from './components/List';
 import './App.scss';
 
@@ -12,4 +12,12 @@ function App() {
     );
 }
 
-export default App;
+function mapStateToProps(state) {
+    console.log('state is', state);
+    return {};
+}
+
+export default connect(
+    mapStateToProps,
+    null,
+)(App)
