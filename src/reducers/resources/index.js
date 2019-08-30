@@ -1,10 +1,14 @@
 import { createSlice } from 'redux-starter-kit';
 
+export const UPDATE_ALL_RESOURCES = 'UPDATE_ALL_RESOURCES';
+
 const resources = createSlice({
     slice: 'resources',
-    initialState: { resource1: { name: 'resource1' } },
+    initialState: [{ name: 'resource1' }],
     reducers: {
-        ADD_RESOURCE: (state, action) => { console.log(action); return state; },
+        [UPDATE_ALL_RESOURCES]: (state, action) => {
+            return action.payload;
+        },
     },
 });
 

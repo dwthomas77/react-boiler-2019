@@ -7,8 +7,6 @@ const reducer = {
     resources: resources.reducer,
 };
 
-console.log('resources are', resources);
-
 const middleware = [...getDefaultMiddleware(), logger];
 
 const store = configureStore({

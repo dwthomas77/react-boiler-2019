@@ -1,0 +1,14 @@
+.filter {
+    width: 500px;
+    display: flex;
+}
+.filter {
+    display: flex;
+    margin: 10px 0;
+    & > * { flex: 1 }
+
+    input {
+        padding: 5px;
+        border: thin gray solid;
+    }
+}

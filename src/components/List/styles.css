@@ -1,0 +1,17 @@
+ul {
+  list-style: none;
+  width: 500px;
+  margin: 0;
+  padding: 0;
+}
+li {
+  border: thin blue solid;
+  padding: 5px 15px;
+  margin-bottom: 5px;
+}
+
+li:hover {
+  background-color: #42c8f5;
+  color: white;
+  cursor: pointer;
+}

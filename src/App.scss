@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 0px 50px;
   h2 {
     color: navy;
   }
@@ -33,4 +34,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.flex-layout {
+  display: flex;
 }
