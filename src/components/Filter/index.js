@@ -19,9 +19,10 @@ class Filter extends React.Component {
         console.log('DEBOUNCED!!!');
         const { UPDATE_ALL_RESOURCES: updateAllResources } = this.props;
         wretch()
-            .url(`https://restcountries.eu/rest/v2/name/${searchTerm}`)
+            .url(searchTerm ? `https://restcountries.eu/rest/v2/name/${searchTerm}` : 'https://restcountries.eu/rest/v2/all')
             .get()
-            .json((json) => { updateAllResources(json) });
+            .json((json) => { updateAllResources(json) })
+            .catch(() => { updateAllResources([]) });
     }
 
     constructor(props) {

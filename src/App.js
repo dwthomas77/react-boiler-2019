@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import wretch from 'wretch';
 import resourcesSlice, { UPDATE_ALL_RESOURCES } from './reducers/resources';
+import Details from './components/Details';
 import List from './components/List';
 import './App.scss';
 
@@ -19,10 +20,10 @@ class App extends React.Component {
         const { resources } = this.props;
         return (
             <div className="App">
-                <h2>React Boilerplate 2019</h2>
+                <h2 className="title">React Boilerplate 2019</h2>
                 <div className="flex-layout">
                     <List items={resources} />
-                    <div> Some other thing here </div>
+                    <Details />
                 </div>
 
             </div>
